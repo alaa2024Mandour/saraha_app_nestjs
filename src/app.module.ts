@@ -3,6 +3,7 @@ import { DB_Module } from './DB/db.module';
 import { UserModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import config from 'config/config.service';
+import { AuthModule } from './common/auth/auth.module';
 
 @Module({
   imports: [
@@ -13,8 +14,7 @@ import config from 'config/config.service';
     }),
     DB_Module,
     UserModule,
-  ],
-  controllers: [],
-  providers: [],
+    AuthModule
+  ]
 })
 export class AppModule {}
