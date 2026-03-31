@@ -1,6 +1,17 @@
-import { Controller } from "@nestjs/common";
+import { Body, Controller, Post, UsePipes } from "@nestjs/common";
+import { UserService } from "./users.service";
+import { ZodValidationPipe } from "src/common/validation/zod.validation";
+import { signUp_schema } from "./user.validationData";
+import type { signUp_DTO } from "./user.validationData";
 
-@Controller()
+@Controller("users")
 export class UserController{
 
+    constructor(private userService : UserService){}
+
+    @Post("/signUp")
+    @UsePipes(new ZodValidationPipe(signUp_schema))
+    async sign_up(@Body() data : signUp_DTO){
+        return await this.userService.signUp(data)
+    }
 }
