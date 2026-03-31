@@ -15,3 +15,11 @@ export const signUp_schema = z.object({
     });
 
 export type signUp_DTO = z.infer<typeof signUp_schema>;
+
+
+
+export const signIn_schema = z.object({ 
+    password:z.string(),
+    email:general_rules.email,
+})
+export type signIn_DTO = z.infer<typeof signIn_schema>;
