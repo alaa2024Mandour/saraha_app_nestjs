@@ -8,6 +8,7 @@ import { successRes } from "src/common/response_handeller/success_response";
 import { Compare, Hash } from "src/common/security/hash.security";
 import { EncrypService } from "src/common/security/encrypt.security";
 import { AuthService } from "src/common/auth/auth.service";
+import { RedisService } from "src/DB/redis/redis.service";
 
 @Injectable()
 export class UserService{
@@ -15,8 +16,17 @@ export class UserService{
         private encryptService : EncrypService,
         private dbService:DB_Service, 
         @InjectModel(User.name) private userModel: Model<UserDocument>,
-        private authService : AuthService
+        private authService : AuthService,
+        private redisService : RedisService
     ) {}
+
+    private confirmed_ket (email:string){
+        return `confirm::otp::${email}`
+    }
+
+    private generateOTP (){
+    return Math.floor(Math.random() * 900000 + 100000);
+};
 
     public async signUp(data : signUp_DTO){
         const {email,password,phone} = data
@@ -37,7 +47,8 @@ export class UserService{
                 phone:this.encryptService.encrypt(phone)
             }
             })
-
+            const OTP = this.generateOTP()
+            await this.redisService.set(this.confirmed_ket(email),OTP,60)
             return successRes("signUp successfully",user)
         } 
 

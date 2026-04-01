@@ -6,11 +6,13 @@ import { User, UserSchema } from "./users.schema";
 import { DB_Service } from "src/DB/db.service";
 import { EncrypService } from "src/common/security/encrypt.security";
 import { AuthModule } from "src/common/auth/auth.module";
+import { RedisModule } from "src/DB/redis/redis.module";
 
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-        AuthModule
+        AuthModule,
+        RedisModule
     ],
     controllers: [UserController],
     providers: [EncrypService,DB_Service,UserService],
