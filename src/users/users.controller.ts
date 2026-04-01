@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Request, UseGuards, UsePipes } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Request, UseGuards, UseInterceptors, UsePipes } from "@nestjs/common";
 import { UserService } from "./users.service";
 import { ZodValidationPipe } from "src/common/validation/zod.validation";
 import { signIn_schema, signUp_schema, userId_schema } from "./user.validationData";
@@ -7,7 +7,9 @@ import { AuthGuard } from "src/common/guards/auth.guard";
 import { RolesGuard } from "src/common/guards/authorization.role.guard";
 import { Roles } from "src/common/decotators/roles.decorator";
 import { RoleEnum } from "src/common/enum/user.enum";
+import { LoggingInterceptor } from "src/common/interceptors/logging.interceptor";
 
+@UseInterceptors(LoggingInterceptor)
 @Controller("users")
 export class UserController{
 
@@ -24,6 +26,7 @@ export class UserController{
     async sign_In(@Body() data : signIn_DTO){
         return await this.userService.signIn(data)
     }
+
 
     @UseGuards(AuthGuard)
     @Get('profile')
