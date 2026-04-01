@@ -1,5 +1,5 @@
 import * as z from "zod"; 
-import { GenderEnum } from "../enum/user.enum";
+import { GenderEnum, RoleEnum } from "../enum/user.enum";
 import { Types } from "mongoose";
 
 export const general_rules = {
@@ -29,7 +29,9 @@ export const general_rules = {
         )
         ,
 
-    gender: z.enum(Object.values(GenderEnum)).default("male"),
+    gender: z.enum(Object.values(GenderEnum)).default(GenderEnum.male),
+
+    role: z.enum(Object.values(RoleEnum)).default(RoleEnum.user),
 
     id: z.string().refine((value) => Types.ObjectId.isValid(value), { //custom validation
         message: "Invalid MongoDB ObjectId structure", 

@@ -1,4 +1,9 @@
-export const GenderEnum = {
-    male:"male",
-    female:"female",
+export enum GenderEnum  {
+    male = "male",
+    female = "female",
+}
+
+export enum RoleEnum {
+    user = 'user',
+    admin = 'admin',
 }

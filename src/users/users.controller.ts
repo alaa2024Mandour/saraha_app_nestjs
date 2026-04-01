@@ -1,9 +1,12 @@
-import { Body, Controller, Get, Post, Request, UseGuards, UsePipes } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Request, UseGuards, UsePipes } from "@nestjs/common";
 import { UserService } from "./users.service";
 import { ZodValidationPipe } from "src/common/validation/zod.validation";
-import { signIn_schema, signUp_schema } from "./user.validationData";
-import type { signIn_DTO, signUp_DTO } from "./user.validationData";
-import { AuthGuard } from "src/common/auth/auth.guard";
+import { signIn_schema, signUp_schema, userId_schema } from "./user.validationData";
+import type { signIn_DTO, signUp_DTO, userId_DTO } from "./user.validationData";
+import { AuthGuard } from "src/common/guards/auth.guard";
+import { RolesGuard } from "src/common/guards/authorization.role.guard";
+import { Roles } from "src/common/decotators/roles.decorator";
+import { RoleEnum } from "src/common/enum/user.enum";
 
 @Controller("users")
 export class UserController{
@@ -28,5 +31,14 @@ export class UserController{
         console.log(req.user._id);
         
         return await this.userService.getMyProfile(req.user._id)
+    }
+
+    @UseGuards(AuthGuard,RolesGuard)
+    @Roles(RoleEnum.admin)
+    @Get('profile/:id')
+    async getUserProfileById(@Request() req, @Param(new ZodValidationPipe(userId_schema)) id:userId_DTO) {
+        console.log(req.user._id);
+        
+        return await this.userService.getUserById(id)
     }
 }

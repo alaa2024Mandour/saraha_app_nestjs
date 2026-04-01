@@ -83,4 +83,17 @@ export class UserService{
                 })
         }
     }
+
+    public async getUserById(data : userId_DTO){
+        const {id} = data
+        const userExist = await this.dbService.findById({
+            model:this.userModel,
+            id
+        })
+
+        
+        if(userExist){
+            return successRes("done",userExist)
+        }
+    }
 }

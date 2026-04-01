@@ -9,6 +9,7 @@ export const signUp_schema = z.object({
     email:general_rules.email,
     phone:general_rules.phone,
     gender:general_rules.gender,
+    role:general_rules.role,
 }).refine((data) => data.password === data.cPassword, {
         message: "Passwords do not match",
         path: ["cPassword"]
