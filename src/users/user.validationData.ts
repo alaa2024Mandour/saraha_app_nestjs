@@ -23,3 +23,9 @@ export const signIn_schema = z.object({
     email:general_rules.email,
 })
 export type signIn_DTO = z.infer<typeof signIn_schema>;
+
+
+export const userId_schema = z.object({ 
+    id:general_rules.id
+})
+export type userId_DTO = z.infer<typeof userId_schema>;

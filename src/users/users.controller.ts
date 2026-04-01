@@ -1,8 +1,9 @@
-import { Body, Controller, Post, UsePipes } from "@nestjs/common";
+import { Body, Controller, Get, Post, Request, UseGuards, UsePipes } from "@nestjs/common";
 import { UserService } from "./users.service";
 import { ZodValidationPipe } from "src/common/validation/zod.validation";
 import { signIn_schema, signUp_schema } from "./user.validationData";
 import type { signIn_DTO, signUp_DTO } from "./user.validationData";
+import { AuthGuard } from "src/common/auth/auth.guard";
 
 @Controller("users")
 export class UserController{
@@ -19,5 +20,13 @@ export class UserController{
     @UsePipes(new ZodValidationPipe(signIn_schema))
     async sign_In(@Body() data : signIn_DTO){
         return await this.userService.signIn(data)
+    }
+
+    @UseGuards(AuthGuard)
+    @Get('profile')
+    async getProfile(@Request() req) {
+        console.log(req.user._id);
+        
+        return await this.userService.getMyProfile(req.user._id)
     }
 }

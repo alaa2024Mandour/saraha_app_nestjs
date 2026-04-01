@@ -6,7 +6,5 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   await app.listen(config().PORT ?? 3000);
   console.log(`DB connected successfully on port ${ config().PORT ?? 3000}`);
-  console.log("-----------process.env.SECRET_KEY--------")
-  console.log(process.env.SECRET_KEY)
 }
 bootstrap();

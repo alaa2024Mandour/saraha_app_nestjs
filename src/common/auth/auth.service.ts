@@ -1,8 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import type { signIn_DTO } from "src/users/user.validationData";
-import { UserService } from "src/users/users.service";
-
 @Injectable()
 export class AuthService{
     constructor(

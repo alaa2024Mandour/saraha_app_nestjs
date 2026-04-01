@@ -3,7 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { User, UserDocument } from "./users.schema";
 import { Model } from "mongoose";
 import { DB_Service } from "src/DB/db.service";
-import type { signIn_DTO, signUp_DTO } from "./user.validationData";
+import type { signIn_DTO, signUp_DTO, userId_DTO } from "./user.validationData";
 import { successRes } from "src/common/response_handeller/success_response";
 import { Compare, Hash } from "src/common/security/hash.security";
 import { EncrypService } from "src/common/security/encrypt.security";
@@ -65,4 +65,22 @@ export class UserService{
         return successRes("signIn successfully",token)
     }
 
+    public async getMyProfile(id : string){
+        const userExist = await this.dbService.findById({
+            model:this.userModel,
+            id
+        })
+
+        
+        if(userExist){
+            return successRes(
+                "done",
+                {
+                    userName : userExist.first_name + " " + userExist.last_name,
+                    email : userExist.email,
+                    phone: this.encryptService.decrypt(userExist.phone),
+                    gender:userExist.gender
+                })
+        }
+    }
 }
