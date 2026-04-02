@@ -26,8 +26,7 @@ export const general_rules = {
         .regex(
             /^(01|02001|\+201)[0125][0-9]{8}$/,
             {message: "Invalid phone number"}
-        )
-        ,
+        ),
 
     gender: z.enum(Object.values(GenderEnum)).default(GenderEnum.male),
 
@@ -36,6 +35,13 @@ export const general_rules = {
     id: z.string().refine((value) => Types.ObjectId.isValid(value), { //custom validation
         message: "Invalid MongoDB ObjectId structure", 
     }),
+
+    otp: z
+        .string()
+        .regex(
+            /^\d{6}$/,
+            {message: "OTP should be 6 digits"}
+        ),
 
     file: z
         .object({

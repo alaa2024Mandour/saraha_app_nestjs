@@ -46,7 +46,7 @@ export class User{
     gender:string;
 
     @Prop()
-    confermid:boolean
+    confirmed:boolean
 
     @Prop({
         enum:Object.values(RoleEnum),

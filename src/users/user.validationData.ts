@@ -30,3 +30,10 @@ export const userId_schema = z.object({
     id:general_rules.id
 })
 export type userId_DTO = z.infer<typeof userId_schema>;
+
+
+export const confirmEmail_schema = z.object({ 
+    email:general_rules.email,
+    code:general_rules.otp
+})
+export type confirmEmail_DTO = z.infer<typeof confirmEmail_schema>;

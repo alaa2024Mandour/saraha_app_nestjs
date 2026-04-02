@@ -3,13 +3,14 @@ import { InjectModel } from "@nestjs/mongoose";
 import { User, UserDocument } from "../DB/models/users.model";
 import { Model } from "mongoose";
 import { DB_Service } from "src/DB/db.service";
-import type { signIn_DTO, signUp_DTO, userId_DTO } from "./user.validationData";
+import type { confirmEmail_DTO, signIn_DTO, signUp_DTO, userId_DTO } from "./user.validationData";
 import { successRes } from "src/common/response_handeller/success_response";
 import { Compare, Hash } from "src/common/security/hash.security";
 import { EncrypService } from "src/common/security/encrypt.security";
 import { AuthService } from "src/common/auth/auth.service";
 import { RedisService } from "src/DB/redis/redis.service";
 import { EmailService } from "src/common/email/email.service";
+import { EmailEnum } from "src/common/enum/email.enum";
 
 @Injectable()
 export class UserService{
@@ -23,7 +24,11 @@ export class UserService{
     ) {}
 
     private confirmed_ket (email:string){
-        return `confirm::otp::${email}`
+        return `${EmailEnum.confirmeEmail}::otp::${email}`
+    }
+
+    private maxTries_ket (email:string){
+        return `${EmailEnum.maxTries}::otp::${email}`
     }
 
     private generateOTP (){
@@ -50,10 +55,56 @@ export class UserService{
             }
             })
             const OTP = this.generateOTP()
-            await this.emailService.sendEmail({toEmail:email,otpCode:OTP})
-            await this.redisService.set(this.confirmed_ket(email),OTP,60)
+            await this.emailService.sendEmail({toEmail:email,otpCode:OTP});
+
+            await this.redisService.set({
+                key:this.confirmed_ket(email),
+                value:await Hash({plainText:String(OTP)}),
+                expireInSeconds:60
+            });
+
+            await this.redisService.set({
+                key:this.maxTries_ket(email),
+                value:1
+            });
+            
             return successRes("signUp successfully",user)
         } 
+
+
+    public async confirmEmail (data : confirmEmail_DTO) {
+    const { email, code } = data;
+
+    const otpValue = await this.redisService.get(this.confirmed_ket(email));
+
+    console.log(otpValue);
+    console.log(this.confirmed_ket(email));
+    
+    if (!otpValue){
+        throw new HttpException("otp expired",HttpStatus.BAD_REQUEST);
+    }
+
+    if (!Compare({ plainText: String(code), cipherText: String(otpValue) })) {
+        throw new Error(" invalid otp ");
+    }
+
+    const user = await this.dbService.findOneAndUpdate({
+        model: this.userModel,
+        filter: {
+            email:email.toLowerCase().trim(),
+            confirmed: { $exists: false }
+        },
+        update: { $set: { confirmed: true } },
+    });
+
+    if (!user) {
+        throw new Error(" user not exist ");
+    }
+
+    await this.redisService.del(this.confirmed_ket(email));
+    return successRes("confirmed successfully");
+};
+
 
     public async signIn(data : signIn_DTO){
         const {email,password} = data

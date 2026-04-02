@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Post, Request, UseGuards, UseInterceptors, UsePipes } from "@nestjs/common";
 import { UserService } from "./users.service";
 import { ZodValidationPipe } from "src/common/validation/zod.validation";
-import { signIn_schema, signUp_schema, userId_schema } from "./user.validationData";
-import type { signIn_DTO, signUp_DTO, userId_DTO } from "./user.validationData";
+import { confirmEmail_schema, signIn_schema, signUp_schema, userId_schema } from "./user.validationData";
+import type { confirmEmail_DTO, signIn_DTO, signUp_DTO, userId_DTO } from "./user.validationData";
 import { AuthGuard } from "src/common/guards/auth.guard";
 import { RolesGuard } from "src/common/guards/authorization.role.guard";
 import { Roles } from "src/common/decotators/roles.decorator";
@@ -19,6 +19,12 @@ export class UserController{
     @UsePipes(new ZodValidationPipe(signUp_schema))
     async sign_up(@Body() data : signUp_DTO){
         return await this.userService.signUp(data)
+    }
+
+    @Post("/confirm")
+    @UsePipes(new ZodValidationPipe(confirmEmail_schema))
+    async confirm_email(@Body() data : confirmEmail_DTO){
+        return await this.userService.confirmEmail(data)
     }
 
     @Post("/signIn")
