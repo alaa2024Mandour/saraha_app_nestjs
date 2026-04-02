@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import config from "config/config.service";
 import crypto from "node:crypto"
 
 
@@ -14,7 +13,8 @@ export class EncrypService{
         const key = this.configService.get<string>('ENCRYPTION_KEY')
 
         this.ENCRYPTION_KEY = Buffer.from(key!)
-        this.IV_LENGTH = this.configService.get<number>('IV_LENGTH')!
+        const ivLengthRaw = this.configService.get<string>('IV_LENGTH');
+        this.IV_LENGTH = Number(ivLengthRaw);
     }
 
 public encrypt(text:string) {

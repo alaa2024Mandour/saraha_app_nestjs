@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Redis } from '@upstash/redis';
-import config from 'config/config.service';
 
 @Injectable()
 export class RedisService {
