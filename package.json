@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^2.3.4",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
@@ -30,6 +31,7 @@
     "bcrypt": "^6.0.0",
     "cross-env": "^10.1.0",
     "dot-env": "^0.0.1",
+    "handlebars": "^4.7.9",
     "ioredis": "^5.10.1",
     "mongoose": "^9.3.3",
     "reflect-metadata": "^0.2.2",

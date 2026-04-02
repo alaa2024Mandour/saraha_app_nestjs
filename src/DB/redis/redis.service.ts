@@ -1,37 +1,34 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Redis } from '@upstash/redis';
+import { Injectable, Inject } from '@nestjs/common';
+import { Redis } from 'ioredis';
 
 @Injectable()
 export class RedisService {
-    private readonly redis: Redis;
+    constructor(@Inject('REDIS_CLIENT') private readonly redisClient: Redis) { }
 
-constructor(private configService: ConfigService) {
-        const url = this.configService.get<string>('UPSTASH_REDIS_REST_URL');
-        const token = this.configService.get<string>('UPSTASH_REDIS_REST_TOKEN');
-
-        
-        if (!url || !token) {
-            console.error('❌ Redis Config is missing! Check your .env file.');
-        }
-
-        this.redis = new Redis({
-            url: url,
-            token: token,
-        });
-    }
-
-    async set(key: string, value: any, ttl?: number) {
-        if(ttl){
-            return await this.redis.set(key, value, { ex:ttl});
-        }
-        else{
-            return await this.redis.set(key, value);
+    
+    async set(key: string, value: any, expireInSeconds?: number): Promise<void> {
+        const stringValue = JSON.stringify(value);
+        if (expireInSeconds) {
+            await this.redisClient.set(key, stringValue, 'EX', expireInSeconds);
+        } else {
+            await this.redisClient.set(key, stringValue);
         }
     }
 
+    
+    async get<T>(key: string): Promise<T | null> {
+        const data = await this.redisClient.get(key);
+        if (!data) return null;
+        return JSON.parse(data) as T;
+    }
 
-    async get(key: string) {
-        return await this.redis.get(key);
+    
+    async del(key: string): Promise<void> {
+        await this.redisClient.del(key);
+    }
+
+   
+    async reset(): Promise<void> {
+        await this.redisClient.flushall();
     }
 }

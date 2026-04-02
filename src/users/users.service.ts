@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { User, UserDocument } from "./users.schema";
+import { User, UserDocument } from "../DB/models/users.model";
 import { Model } from "mongoose";
 import { DB_Service } from "src/DB/db.service";
 import type { signIn_DTO, signUp_DTO, userId_DTO } from "./user.validationData";
@@ -9,6 +9,7 @@ import { Compare, Hash } from "src/common/security/hash.security";
 import { EncrypService } from "src/common/security/encrypt.security";
 import { AuthService } from "src/common/auth/auth.service";
 import { RedisService } from "src/DB/redis/redis.service";
+import { EmailService } from "src/common/email/email.service";
 
 @Injectable()
 export class UserService{
@@ -17,7 +18,8 @@ export class UserService{
         private dbService:DB_Service, 
         @InjectModel(User.name) private userModel: Model<UserDocument>,
         private authService : AuthService,
-        private redisService : RedisService
+        private redisService : RedisService,
+        private emailService : EmailService
     ) {}
 
     private confirmed_ket (email:string){
@@ -48,6 +50,7 @@ export class UserService{
             }
             })
             const OTP = this.generateOTP()
+            await this.emailService.sendEmail({toEmail:email,otpCode:OTP})
             await this.redisService.set(this.confirmed_ket(email),OTP,60)
             return successRes("signUp successfully",user)
         } 

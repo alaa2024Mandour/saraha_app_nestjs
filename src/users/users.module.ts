@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { UserController } from "./users.controller";
 import { UserService } from "./users.service";
 import { MongooseModule } from "@nestjs/mongoose";
-import { User, UserSchema } from "./users.schema";
+import { User, UserSchema } from "../DB/models/users.model";
 import { DB_Service } from "src/DB/db.service";
 import { EncrypService } from "src/common/security/encrypt.security";
 import { AuthModule } from "src/common/auth/auth.module";
