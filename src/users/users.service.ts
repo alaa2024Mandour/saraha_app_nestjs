@@ -11,13 +11,16 @@ import { AuthService } from "src/common/auth/auth.service";
 import { RedisService } from "src/DB/redis/redis.service";
 import { EmailService } from "src/common/email/email.service";
 import { EmailEnum } from "src/common/enum/email.enum";
+import { Queue } from "bullmq";
+import { InjectQueue } from "@nestjs/bullmq";
 
 @Injectable()
 export class UserService{
     constructor(
+        @InjectQueue('mail-queue') private mailQueue: Queue,
+        @InjectModel(User.name) private userModel: Model<UserDocument>,
         private encryptService : EncrypService,
         private dbService:DB_Service, 
-        @InjectModel(User.name) private userModel: Model<UserDocument>,
         private authService : AuthService,
         private redisService : RedisService,
         private emailService : EmailService
@@ -55,7 +58,11 @@ export class UserService{
             }
             })
             const OTP = this.generateOTP()
-            await this.emailService.sendEmail({toEmail:email,otpCode:OTP});
+            await this.mailQueue.add('send-otp-email', {
+                    email,
+                    otp:OTP,
+                });
+            // await this.emailService.sendEmail({toEmail:email,otpCode:OTP});
 
             await this.redisService.set({
                 key:this.confirmed_ket(email),
@@ -68,7 +75,7 @@ export class UserService{
                 value:1
             });
             
-            return successRes("signUp successfully",user)
+            return successRes("signUp successfully, please verify your account we send an otp to your email",user)
         } 
 
 
@@ -101,7 +108,9 @@ export class UserService{
         throw new Error(" user not exist ");
     }
 
-    await this.redisService.del(this.confirmed_ket(email));
+    const d = await this.redisService.del(this.confirmed_ket(email));
+    console.log(d);
+    
     return successRes("confirmed successfully");
 };
 
