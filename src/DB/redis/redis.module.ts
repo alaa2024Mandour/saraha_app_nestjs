@@ -3,10 +3,12 @@ import Redis from 'ioredis';
 import { RedisService } from './redis.service';
 import { BullModule } from '@nestjs/bullmq';
 import { EMailProcessor } from 'src/common/processors/email.processor';
+import { ConfigService, ConfigModule } from '@nestjs/config';
 
 @Global() 
 @Module({
   imports:[
+    ConfigModule,
     BullModule.registerQueue(
       {
         name: 'mail-queue',
@@ -16,25 +18,28 @@ import { EMailProcessor } from 'src/common/processors/email.processor';
         },
       },
     ),
-    BullModule.forRoot({
-      connection: {
-        host: '127.0.0.1',
-        port: 6379,
-      },
-    }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get<string>('REDIS_HOST') || 'redis',
+          port: config.get<number>('REDIS_PORT') || 6379,
+        },
+  }),
+}),
   ],
   providers: [
     {
       provide: 'REDIS_CLIENT',
-      useFactory: () => {
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
         const client = new Redis({
-          host: '127.0.0.1', // أو localhost
-          port: 6379,
+          host: configService.get<string>('REDIS_HOST') || '127.0.0.1',
+          port: configService.get<number>('REDIS_PORT') || 6379,
         });
 
         client.on('error', (err) => console.error('Redis Error', err));
         client.on('connect', () => console.log('Successfully connected to Redis!'));
-
         return client;
       },
     },

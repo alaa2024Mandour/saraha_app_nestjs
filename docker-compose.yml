@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # 1. خدمة الـ MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: notes-mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  # 2. خدمة الـ Redis
+  redis:
+    image: redis:alpine
+    container_name: notes-redis
+    ports:
+      - "6379:6379"
+
+  # 3. الأبلكيشن بتاعك (NestJS)
+  api:
+    build: .
+    container_name: notes-app-api
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongodb
+      - redis
+    env_file:
+      - ./config/.env.development
+    environment:
+      # هنا بنغير الـ Hostname لأسماء الخدمات في الدوكر
+      - DB_URI=mongodb://mongodb:27017/sarahaApp2-app
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NODE_ENV=development # أو حسب الملف اللي عايزة تقرأيه
+
+volumes:
+  mongo_data:
